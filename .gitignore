@@ -1,0 +1,10 @@
+# Python files
+venv/
+__pycache__/
+db/
+
+# Node.js files
+node_modules/
+.env
+.temp/
+.DS_Store
