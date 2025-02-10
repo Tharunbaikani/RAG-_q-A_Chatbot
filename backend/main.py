@@ -7,6 +7,14 @@ import chromadb
 import openai
 import os
 from openai import OpenAI
+from dotenv import load_dotenv
+load_dotenv()
+
+# Get API key from environment
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+if not OPENAI_API_KEY:
+    raise ValueError("OpenAI API key is missing. Set it in the .env file.")
 
 app = FastAPI()
 
@@ -22,7 +30,8 @@ app.add_middleware(
 def read_root():
     return {"message": "Hello, FastAPI is running!"}
 
-client = OpenAI(api_key="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")
+
+client = OpenAI(api_key=OPENAI_API_KEY)
 chroma_client = chromadb.PersistentClient(path="db")
 collection = chroma_client.get_or_create_collection(name="documents")
 
