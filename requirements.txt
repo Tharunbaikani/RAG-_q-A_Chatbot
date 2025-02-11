@@ -4,3 +4,5 @@ pdfplumber
 chromadb
 openai
 python-multipart
+langchain
+langchain-community

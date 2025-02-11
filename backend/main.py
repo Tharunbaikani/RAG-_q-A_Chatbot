@@ -76,7 +76,7 @@ async def query_rag(query: str = Form(...)):
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are an AI assistant."},
+                {"role": "system", "content": "You are an AI assistant and your name is Black Hole Created by Tharun."},
                 {"role": "user", "content": f"Context: {context}\n\nQuestion: {query}"}
             ]
         )
@@ -89,3 +89,100 @@ async def query_rag(query: str = Form(...)):
         return {"response": f"Error processing query: {str(e)}"}
 
 
+
+
+
+# from fastapi import FastAPI, UploadFile, File, Form
+# from fastapi.middleware.cors import CORSMiddleware
+# import os
+# import shutil
+# from dotenv import load_dotenv
+# from langchain.document_loaders import PyPDFLoader
+# from langchain.text_splitter import RecursiveCharacterTextSplitter
+# from langchain.vectorstores import Chroma
+# from langchain.embeddings import OpenAIEmbeddings
+# from langchain.chat_models import ChatOpenAI
+# from langchain.schema import HumanMessage, SystemMessage
+
+# # Load environment variables
+# load_dotenv()
+# OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+# if not OPENAI_API_KEY:
+#     raise ValueError("OpenAI API key is missing. Set it in the .env file.")
+
+# app = FastAPI()
+
+# # Enable CORS for frontend communication
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
+# # Initialize LangChain components
+# vector_db_path = "vector_db"
+# os.makedirs(vector_db_path, exist_ok=True)
+
+# # Initialize the embedding model
+# embedding_model = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
+
+# # Load vector store
+# vector_store = Chroma(persist_directory=vector_db_path, embedding_function=embedding_model)
+
+# # OpenAI chat model
+# llm = ChatOpenAI(model_name="gpt-3.5-turbo", api_key=OPENAI_API_KEY)
+
+
+# @app.get("/")
+# def read_root():
+#     return {"message": "Hello, FastAPI with LangChain is running!"}
+
+
+# @app.post("/upload/")
+# async def upload_pdf(file: UploadFile = File(...)):
+#     """Uploads and processes a PDF, storing chunks in the vector database."""
+#     temp_dir = "temp"
+#     os.makedirs(temp_dir, exist_ok=True)
+    
+#     file_path = os.path.join(temp_dir, file.filename)
+    
+#     with open(file_path, "wb") as buffer:
+#         shutil.copyfileobj(file.file, buffer)
+    
+#     # Load and split PDF text
+#     loader = PyPDFLoader(file_path)
+#     documents = loader.load()
+    
+#     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
+#     chunks = text_splitter.split_documents(documents)
+
+#     # Add to vector database
+#     vector_store.add_documents(chunks)
+
+#     return {"message": "PDF uploaded and processed successfully."}
+
+
+# @app.post("/query/")
+# async def query_rag(query: str = Form(...)):
+#     """Handles user queries with retrieval-augmented generation (RAG)."""
+#     try:
+#         # Retrieve relevant documents
+#         docs = vector_store.similarity_search(query, k=3)
+#         context = "\n\n".join([doc.page_content for doc in docs]) if docs else "No relevant documents found."
+
+#         # Generate response using OpenAI LLM
+#         messages = [
+#             SystemMessage(content="You are an AI assistant that answers user queries based on provided context."),
+#             HumanMessage(content=f"Context: {context}\n\nQuestion: {query}")
+#         ]
+        
+#         response = llm(messages)
+#         ai_response = response.content if response else "Error generating response."
+
+#         return {"response": ai_response}
+    
+#     except Exception as e:
+#         return {"response": f"Error processing query: {str(e)}"}

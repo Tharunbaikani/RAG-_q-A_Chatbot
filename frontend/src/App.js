@@ -12,6 +12,9 @@ function App() {
   const [message, setMessage] = useState("");
   const [chat, setChat] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [isUploaded, setIsUploaded] = useState(false); // Track PDF upload status-R
+  const [isTyping, setIsTyping] = useState(false); // :NEW: Track bot typing effect
+  const [typingInterval, setTypingInterval] = useState(null);
 
   // Clear chat on refresh
   useEffect(() => {
@@ -29,22 +32,79 @@ function App() {
     const formData = new FormData();
     formData.append("file", file);
 
-    await axios.post("http://127.0.0.1:8000/upload/", formData);
-    setIsUploading(false);
-    alert("File uploaded successfully!");
+    try {
+      await axios.post("http://127.0.0.1:8000/upload/", formData);
+      setIsUploaded(true); // Mark upload as complete
+      alert("File uploaded successfully!");
+    } catch (error) {
+      alert("Upload failed. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
   };
+
+
+  
+  
 
   const handleSendMessage = async () => {
     if (!message) return;
+
+    setChat([...chat, { user: message, bot: "Typing..." }]); // :NEW: Show "Typing..." first
+    setIsTyping(true); // :NEW: Disable send button while bot is typing
+
 
     const formData = new FormData();
     formData.append("query", message);
 
     const response = await axios.post("http://127.0.0.1:8000/query/", formData);
 
-    setChat([...chat, { user: message, bot: response.data.response }]);
+    // setChat([...chat, { user: message, bot: response.data.response }]);
+    simulateTypingEffect(response.data.response); // :NEW: Call typewriter effect
     setMessage("");
   };
+  //new func
+  
+  const handleStopTyping = () => {
+    if (typingInterval) {
+      clearInterval(typingInterval);
+      setTypingInterval(null);
+      setIsTyping(false);
+    }
+  };
+
+
+
+  // :NEW: Function to simulate typewriter effect
+  const simulateTypingEffect = (fullText) => {
+    let index = 0;
+  
+    setTimeout(() => {
+      setChat((prevChat) => {
+        const newChat = [...prevChat];
+        newChat[newChat.length - 1].bot = ""; // Clear "Typing..."
+        return newChat;
+      });
+  
+      const interval = setInterval(() => {
+        setChat((prevChat) => {
+          const newChat = [...prevChat];
+          if (index < fullText.length) {
+            newChat[newChat.length - 1].bot = fullText.slice(0, index + 1); // Append correctly
+          }
+          return newChat;
+        });
+  
+        index++;
+        if (index === fullText.length) {
+          clearInterval(interval);
+          setIsTyping(false); // Re-enable send button after typing is done
+        }
+      }, 20);
+      setTypingInterval(interval); // Adjust typing speed here
+    }, 300);
+  };
+  
 
   return (
     <div className="chat-container">
@@ -87,9 +147,27 @@ function App() {
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Ask anything from your Pdf..."
+          // placeholder="Ask anything from your Pdf..."
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault(); // Prevents form submission (if any)
+              handleSendMessage(); // Calls the send function
+            }
+          }}
+          placeholder={isUploaded ? "Ask anything from your PDF..." : "Upload a PDF first!"}
+          disabled={!isUploaded || isTyping} // :NEW: Disable input if typing
+          // disabled={!isUploaded} // Disable input if PDF is not uploaded
         />
-        <button onClick={handleSendMessage}>Send</button>
+        {/* <button onClick={handleSendMessage}>Send</button> */}
+
+        
+
+        <button onClick={isTyping ? handleStopTyping : handleSendMessage}>
+          {isTyping ? "Stop" : "Send"}
+        </button>
+
+
+
       </div>
     </div>
   );
