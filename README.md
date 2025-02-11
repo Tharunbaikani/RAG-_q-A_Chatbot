@@ -4,6 +4,9 @@
 
 # 🚀 RAGFlow: Full-Stack RAG-Based Document Q&A Chatbot 📄🤖  
 
+![Interface](https://github.com/user-attachments/assets/30d9d03f-2333-41e9-9237-e5989c25d3c3)
+
+
 [RAGFlow](https://github.com/Tharunbaikani/Full-Stack-RAG-Q-A-Chatbot) is an **end-to-end Retrieval-Augmented Generation (RAG) chatbot** that enables seamless document-based Q&A using state-of-the-art AI techniques.  
 
 ## 🔹 Key Features & Tech Stack  
