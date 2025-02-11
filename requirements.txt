@@ -6,3 +6,4 @@ openai
 python-multipart
 langchain
 langchain-community
+langchain-openai
